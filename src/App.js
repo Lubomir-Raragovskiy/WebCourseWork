@@ -1,25 +1,37 @@
-import logo from './logo.svg';
 import './App.css';
+import Menu from "./components/Menu";
+import GradeListComponent from "./pages/GradeList"
+import StudentListComponent from "./pages/StudentList"
+import StudentPage from "./pages/StudentPage"
+import AddStudent from "./pages/AddStudent"
+import Home from "./pages/Home"
+import { Routes, Route } from "react-router-dom"
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+
+    return (
+        <section className="app">
+            <header className="app-header">
+                <Menu />
+            </header>
+
+            <main>
+
+
+                <Routes >
+                    <Route path='/students/:studentName' element={<StudentPage />} />
+                    <Route path='/grades/:grade' element={<StudentListComponent />} />
+                    <Route path='/students/add' element={<AddStudent />} />
+                    <Route path='/students' element={<StudentListComponent />} />
+                    <Route path='/grades' element={<GradeListComponent />} />
+                    <Route path='/' element={<Home />} />
+                </Routes>
+
+
+            </main>
+        </section>
+    );
 }
 
 export default App;
