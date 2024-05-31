@@ -4,6 +4,7 @@ import GradeListComponent from "./pages/GradeList"
 import StudentListComponent from "./pages/StudentList"
 import StudentPage from "./pages/StudentPage"
 import AddStudent from "./pages/AddStudent"
+import SignInForm from './pages/SignIn';
 import Home from "./pages/Home"
 import { Routes, Route } from "react-router-dom"
 
@@ -25,6 +26,7 @@ function App() {
                     <Route path='/students/add' element={<AddStudent />} />
                     <Route path='/students' element={<StudentListComponent />} />
                     <Route path='/grades' element={<GradeListComponent />} />
+                    <Route path='/signIn' element={<SignInForm />} />
                     <Route path='/' element={<Home />} />
                 </Routes>
 
