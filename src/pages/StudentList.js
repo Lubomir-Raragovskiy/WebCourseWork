@@ -9,7 +9,6 @@ const StudentListComponent = () => {
     const navigate = useNavigate();
 
     const gradeFilter = useRef(localStorage.getItem('gradeFilter'));
-    console.log(gradeFilter);
     
     useEffect(() => {
         localStorage.removeItem('gradeFilter');
@@ -22,9 +21,6 @@ const StudentListComponent = () => {
             setStudentList(data);
         }
     }, [data]);
-
-    
-
 
     
     return (
