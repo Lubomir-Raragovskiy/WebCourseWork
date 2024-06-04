@@ -1,7 +1,7 @@
 import React, { useState} from 'react';
 import { Button, Form } from 'react-bootstrap';
 import { auth } from '../utils/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithCustomToken } from 'firebase/auth';
 import { useNavigate } from "react-router-dom";
 
 const SignInForm = () => {
@@ -18,7 +18,7 @@ const SignInForm = () => {
         }
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            await signInWithCustomToken(auth, email, password);
 
             setEmail('');
             setPassword('');

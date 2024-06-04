@@ -1,50 +1,70 @@
 import React, { useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import { db } from "../utils/firebase";
-import { push, ref } from "firebase/database";
 import axios from 'axios';
 
 const AddStudent = () => {
     const [studentName, setStudentName] = useState('');
     const [grade, setGrade] = useState('');
-    const [portraitSrc, setPortraitSrc] = useState('');
+    const [portraitFile, setPortraitFile] = useState(null);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+        if (file && validImageTypes.includes(file.type)) {
+            setPortraitFile(file);
+        } else {
+            alert('Please upload a valid image file (jpg, png, or gif).');
+            setPortraitFile(null);
+            e.target.value = null;
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!studentName || !grade || !portraitSrc || !email || !password) { 
+        if (!studentName || !grade || !email || !password) {
             alert('Please fill in all fields');
             return;
         }
 
         try {
-            const role = "student";
+            let portraitSrc = '';
 
-            const response = await axios.post('http://localhost:5000/api/signup', { email, role, password });
+            if (portraitFile) {
+                const formData = new FormData();
+                formData.append('file', portraitFile);
 
-            const id = response.data.customToken;
+                const uploadResponse = await axios.post('http://localhost:5000/api/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
 
-            const newStudentRef = ref(db, 'Students');
-            await push(newStudentRef, {
-                id,
+                portraitSrc = uploadResponse.data.fileUrl;
+            }
+
+            const response = await axios.post('http://localhost:5000/api/students', {
                 studentName,
                 grade,
                 portraitSrc,
                 email,
-                password
+                password,
             });
 
             setStudentName('');
             setGrade('');
-            setPortraitSrc('');
-            setEmail(''); 
+            setPortraitFile(null);
+            setEmail('');
             setPassword('');
+
+            document.getElementById('portraitFile').value = null;
 
             alert('Student added successfully!');
         } catch (error) {
-            console.error('Error adding student: ', error);
+            console.error('Error adding student:', error);
             alert('An error occurred while adding the student. Please try again later.');
         }
     };
@@ -73,23 +93,22 @@ const AddStudent = () => {
                     />
                 </Form.Group>
 
-                <Form.Group className="mb-3" controlId="portraitSrc">
+                <Form.Group className="mb-3" controlId="portraitFile">
                     <Form.Label>Portrait Source</Form.Label>
                     <Form.Control
-                        type="text"
-                        placeholder="Enter portrait source"
-                        value={portraitSrc}
-                        onChange={(e) => setPortraitSrc(e.target.value)}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
                     />
                 </Form.Group>
 
-                <Form.Group className="mb-3" controlId="email"> 
-                    <Form.Label>Email</Form.Label> 
+                <Form.Group className="mb-3" controlId="email">
+                    <Form.Label>Email</Form.Label>
                     <Form.Control
-                        type="text"
-                        placeholder="Enter email" 
-                        value={email} 
-                        onChange={(e) => setEmail(e.target.value)} 
+                        type="email"
+                        placeholder="Enter email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                 </Form.Group>
 

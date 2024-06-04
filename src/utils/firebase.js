@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
+import { getStorage } from "firebase/storage"
 
 const firebaseConfig = {
     apiKey: "AIzaSyChkMVRuOibazGxEEBx78rQoe7qXeJUj-k",
@@ -9,11 +10,12 @@ const firebaseConfig = {
     projectId: "schoolmanagement-65c57",
     storageBucket: "schoolmanagement-65c57.appspot.com",
     messagingSenderId: "617310786984",
-    appId: "1:617310786984:web:99f66cf4d3cf69a393399d"
+    appId: "1:617310786984:web:99f66cf4d3cf69a393399d",
+    storageBucket : "gs://schoolmanagement-65c57.appspot.com"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
-
-export { db, auth };
+const storage = getStorage(app);
+export { db, auth, storage };

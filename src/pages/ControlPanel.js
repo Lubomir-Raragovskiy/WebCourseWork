@@ -29,7 +29,7 @@ const ControlPanel = () => {
     const deleteUser = async (uid) => {
       setError('');
       try {
-        const response = await axios.delete(`http://localhost:5000/api/users/${uid}`);
+        await axios.delete(`http://localhost:5000/api/users/${uid}`);
         fetchUsers();
       } catch (error) {
         setError(error.message);
@@ -39,7 +39,7 @@ const ControlPanel = () => {
     const updateUserRole = async (uid, role) => {
       setError('');
       try {
-        const response = await axios.post(`http://localhost:5000/api/users/${uid}/role`, { role });
+        await axios.post(`http://localhost:5000/api/users/${uid}/role`, { role });
         fetchUsers();
       } catch (error) {
         setError(error.message);
@@ -71,7 +71,7 @@ const ControlPanel = () => {
                       {users.map((user) => (
                           <tr key={user.uid}>
                               <td>{user.email}</td>
-                              <td>{user.role || 'user'}</td>
+                              <td>{user.role}</td>
                               <td>
                                   <Button variant="secondary" onClick={() => deleteUser(user.uid)} className="me-2">
                                       Delete
