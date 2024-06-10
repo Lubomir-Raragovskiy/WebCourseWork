@@ -1,13 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios from 'axios';
 
 const AddStudent = () => {
     const [studentName, setStudentName] = useState('');
     const [grade, setGrade] = useState('');
+    const [grades, setGrades] = useState([]);
     const [portraitFile, setPortraitFile] = useState(null);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    useEffect(() => {
+        fetchGrades();
+    }, []);
+
+    const fetchGrades = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/grades');
+            setGrades(response.data);
+        } catch (error) {
+            console.error('Error fetching grades:', error);
+            alert('An error occurred while fetching grades. Please try again later.');
+        }
+    };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -46,7 +61,7 @@ const AddStudent = () => {
                 portraitSrc = uploadResponse.data.fileUrl;
             }
 
-            const response = await axios.post('http://localhost:5000/api/students', {
+            await axios.post('http://localhost:5000/api/students', {
                 studentName,
                 grade,
                 portraitSrc,
@@ -86,11 +101,17 @@ const AddStudent = () => {
                 <Form.Group className="mb-3" controlId="grade">
                     <Form.Label>Grade</Form.Label>
                     <Form.Control
-                        type="text"
-                        placeholder="Enter grade"
+                        as="select"
                         value={grade}
                         onChange={(e) => setGrade(e.target.value)}
-                    />
+                    >
+                        <option value="">Select grade</option>
+                        {grades.map(grade => (
+                            <option key={grade.id} value={grade.grade}>
+                                {grade.grade}
+                            </option>
+                        ))}
+                    </Form.Control>
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="portraitFile">

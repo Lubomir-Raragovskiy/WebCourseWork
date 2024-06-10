@@ -20,8 +20,8 @@ const GradeListComponent = () => {
         }
     };
 
-    const goToGrade = (grade) => {
-        navigate(`/grades/${grade}`);
+    const goToGrade = (gradeId) => {
+        navigate(`/grades/${gradeId}`);
     };
 
     return (
@@ -31,7 +31,7 @@ const GradeListComponent = () => {
                     <div key={grade.id}>
                         <Button variant="outline-secondary"
                             className="w-100 mb-1 mt-1"
-                            onClick={() => goToGrade(grade.grade)}> 
+                            onClick={() => goToGrade(grade.id)}> 
                             {grade.grade}
                         </Button>
                     </div>

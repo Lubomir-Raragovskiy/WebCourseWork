@@ -3,36 +3,35 @@ import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
-const StudentCard = (props) => {
+const StudentCard = ({ student, onDelete }) => {
     const navigate = useNavigate();
 
     const goToDetails = () => {
-        localStorage.setItem('selectedStudent', JSON.stringify({
-            studentName: props.card.studentName,
-            grade: props.card.grade,
-            studentPortraitSrc: props.card.studentPortraitSrc
-        }));
-        navigate("/students/" + props.card.studentName);
+        navigate("/students/" + student.id);
+    };
+
+    const goToMarks = () => {
+        navigate("/marks/" + student.id);
     };
 
     const deleteStudent = async () => {
         try {
-
-            await axios.delete(`http://localhost:5000/api/students/${props.card.id}`);
-            await axios.delete(`http://localhost:5000/api/users/${props.card.uid}`);
-            props.onDelete(props.card.id);
+            await axios.delete(`http://localhost:5000/api/students/${student.id}`);
+            await axios.delete(`http://localhost:5000/api/users/${student.uid}`);
+            onDelete(student.id);
         } catch (error) {
             console.error('Error deleting student:', error);
         }
     };
 
     return (
-        <Card>
-            <Card.Img variant="top" src={props.card.portraitSrc} />
+        <Card className="mb-3">
             <Card.Body>
-                <Card.Title>{props.card.studentName}</Card.Title>
-                <Card.Text>{props.card.grade}</Card.Text>
+                <Card.Img variant="top" src={student.portraitSrc} />
+                <Card.Title>{student.studentName}</Card.Title>
+                <Card.Text>{student.grade}</Card.Text>
                 <Button variant="outline-secondary" onClick={goToDetails}>Student details</Button>
+                <Button variant="outline-secondary" onClick={goToMarks} className="ms-2">Marks</Button>
                 <Button variant="outline-secondary" onClick={deleteStudent} className="ms-2">Delete</Button>
             </Card.Body>
         </Card>

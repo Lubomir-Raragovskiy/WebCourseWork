@@ -36,17 +36,6 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
-
-async function listAllUsers(nextPageToken) {
-  const listUsersResult = await admin.auth().listUsers(100, nextPageToken);
-  const users = listUsersResult.users.map(userRecord => userRecord.toJSON());
-  if (listUsersResult.pageToken) {
-    const nextUsers = await listAllUsers(listUsersResult.pageToken);
-    return users.concat(nextUsers);
-  }
-  return users;
-}
-
 app.delete('/api/users/:uid', async (req, res) => {
   const uid = req.params.uid;
   try {
@@ -104,6 +93,22 @@ app.delete('/api/students/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting student:', error);
     res.status(500).send({ error: 'Error deleting student.' });
+  }
+});
+
+app.get('/api/students/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const studentRef = admin.database().ref(`Students/${id}`);
+    const snapshot = await studentRef.once('value');
+    if (!snapshot.exists()) {
+      return res.status(404).send({ message: 'Student not found' });
+    }
+    const studentData = snapshot.val();
+    res.status(200).json(studentData);
+  } catch (error) {
+    console.error('Error fetching student details:', error);
+    res.status(500).send({ error: 'Error fetching student details.' });
   }
 });
 
@@ -176,6 +181,86 @@ app.get('/api/grades', async (req, res) => {
   }
 });
 
+app.get('/api/grades/:gradeId', async (req, res) => {
+  const gradeId = req.params.gradeId;
+  try {
+    const gradeRef = admin.database().ref(`Grades/${gradeId}`);
+    const snapshot = await gradeRef.once('value');
+    const grade = snapshot.val();
+    if (grade) {
+      res.status(200).send(grade);
+    } else {
+      res.status(404).send({ error: 'Grade not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching grade:', error);
+    res.status(500).send({ error: 'Failed to fetch grade' });
+  }
+});
+
+app.post('/api/grades/:gradeId/subjects', async (req, res) => {
+  const gradeId = req.params.gradeId;
+  const { name, teacherId } = req.body;
+  try {
+    const subjectsRef = admin.database().ref(`Grades/${gradeId}/subjects`);
+    const newSubjectRef = subjectsRef.push();
+    await newSubjectRef.set({ name, teacherId });
+    res.status(200).send({ message: 'Subject added successfully' });
+  } catch (error) {
+    console.error('Error adding subject:', error);
+    res.status(500).send({ error: 'Failed to add subject' });
+  }
+});
+
+app.delete('/api/grades/:gradeId/subjects/:subjectName', async (req, res) => {
+  const gradeId = req.params.gradeId;
+  const subjectName = req.params.subjectName;
+  try {
+    const subjectRef = admin.database().ref(`Grades/${gradeId}/subjects/${subjectName}`);
+    await subjectRef.remove();
+    res.status(200).send({ message: 'Subject removed successfully' });
+  } catch (error) {
+    console.error('Error removing subject:', error);
+    res.status(500).send({ error: 'Failed to remove subject' });
+  }
+});
+
+app.put('/api/grades/:gradeId/subjects/:subjectName', async (req, res) => {
+  const { gradeId, subjectName } = req.params;
+  const { teacherId } = req.body;
+
+  try {
+    const subjectRef = admin.database().ref(`Grades/${gradeId}/subjects/${subjectName}`);
+    await subjectRef.update({ teacherId });
+    res.status(200).send({ message: 'Teacher assigned successfully' });
+  } catch (error) {
+    console.error('Error assigning teacher:', error);
+    res.status(500).send({ error: 'Failed to assign teacher' });
+  }
+});
+
+
+app.get('/api/subjects', async (req, res) => {
+  try {
+    const subjectsRef = admin.database().ref('Subjects');
+    const snapshot = await subjectsRef.once('value');
+    const subjects = [];
+
+    snapshot.forEach(childSnapshot => {
+      subjects.push({
+        id: childSnapshot.key,
+        ...childSnapshot.val()
+      });
+    });
+
+    res.status(200).json(subjects);
+  } catch (error) {
+    console.error('Error fetching subjects:', error);
+    res.status(500).json({ error: 'Failed to fetch subjects' });
+  }
+});
+
+
 app.post('/api/upload', async (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).send('No files were uploaded.');
@@ -209,6 +294,93 @@ app.post('/api/upload', async (req, res) => {
 
   blobStream.end(file.data);
 });
+
+app.get('/api/teachers', async (req, res) => {
+  try {
+    const teachersRef = admin.database().ref('Teachers');
+    teachersRef.once('value', snapshot => {
+      if (!snapshot.exists()) {
+        return res.status(404).send({ message: 'No teachers found' });
+      }
+      const teachers = [];
+      snapshot.forEach(childSnapshot => {
+        teachers.push({ id: childSnapshot.key, ...childSnapshot.val() });
+      });
+      res.status(200).send(teachers);
+    });
+  } catch (error) {
+    res.status(500).send({ error: 'Error fetching teachers' });
+  }
+});
+
+app.post('/api/teachers', async (req, res) => {
+  const { name, email, subjects, password, portraitSrc } = req.body;
+  let userRecord;
+
+  try {
+    userRecord = await admin.auth().createUser({ email, password });
+
+    await admin.auth().setCustomUserClaims(userRecord.uid, { role: 'teacher' });
+
+    const newTeacherRef = admin.database().ref('Teachers').push();
+    await newTeacherRef.set({
+      uid: userRecord.uid,
+      name,
+      subjects,
+      portraitSrc
+    });
+
+    res.status(200).json({ message: 'Teacher added successfully', uid: userRecord.uid });
+  } catch (error) {
+    if (userRecord) {
+      await admin.auth().deleteUser(userRecord.uid);
+    }
+    console.error('Error adding teacher:', error);
+    res.status(500).json({ error: 'Failed to add teacher' });
+  }
+});
+
+
+app.get('/api/teachers/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const teacherRef = admin.database().ref(`Teachers/${id}`);
+    const snapshot = await teacherRef.once('value');
+    if (!snapshot.exists()) {
+      return res.status(404).send({ error: 'Teacher not found' });
+    }
+    const teacherData = snapshot.val();
+    res.status(200).send(teacherData);
+  } catch (error) {
+    console.error('Error fetching teacher data:', error);
+    res.status(500).send({ error: 'Error fetching teacher data' });
+  }
+});
+
+app.delete('/api/teachers/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const teacherRef = admin.database().ref(`Teachers/${id}`);
+    const snapshot = await teacherRef.once('value');
+    const teacherData = snapshot.val();
+    
+    await teacherRef.remove();
+
+    if (teacherData && teacherData.portraitSrc) {
+      const fileUrl = teacherData.portraitSrc;
+      const fileName = fileUrl.split('/').pop();
+      const fileRef = bucket.file(`portraits/${fileName}`);
+      
+      await fileRef.delete();
+    }
+
+    res.status(200).send({ message: 'Teacher deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting teacher:', error);
+    res.status(500).send({ error: 'Error deleting teacher.' });
+  }
+});
+
 
 
 const PORT = process.env.PORT || 5000;
