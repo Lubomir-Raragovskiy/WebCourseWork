@@ -34,17 +34,14 @@ const SignInForm = () => {
             console.error('Error signing in: ', error);
 
             switch (error.code) {
-                case 'auth/invalid-email':
-                    setError('Invalid email address');
+                case 'auth/invalid-credential':
+                    setError('Invalid email address or password');
                     break;
                 case 'auth/user-disabled':
                     setError('User account is disabled');
                     break;
                 case 'auth/user-not-found':
                     setError('User not found');
-                    break;
-                case 'auth/wrong-password':
-                    setError('Incorrect password');
                     break;
                 default:
                     setError('An error occurred while signing in. Please try again later.');

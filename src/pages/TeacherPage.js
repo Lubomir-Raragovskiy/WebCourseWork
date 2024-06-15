@@ -7,8 +7,8 @@ import SubjectsList from '../components/SubjectsSelectableList';
 import PortraitUploader from '../components/PortraitUploader';
 
 const TeacherPage = () => {
-    const { id, userDetails } = useParams();
-    const { role } = useContext(AuthContext);
+    const { id } = useParams();
+    const { role, userDetails } = useContext(AuthContext);
     const [selectedSubjects, setSelectedSubjects] = useState([]);
     const [teacherDetails, setTeacherDetails] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -78,13 +78,13 @@ const TeacherPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         const updatedData = { ...formData, subjects: selectedSubjects };
-
+    
         if (portraitFile) {
             const fileData = new FormData();
             fileData.append('file', portraitFile);
-
+    
             try {
                 const uploadResponse = await axios.post('http://localhost:5000/api/upload', fileData, {
                     headers: {
@@ -92,18 +92,25 @@ const TeacherPage = () => {
                     }
                 });
                 updatedData.portraitSrc = uploadResponse.data.fileUrl;
+    
+                if (teacherDetails?.portraitSrc) {
+                    const oldFileName = teacherDetails.portraitSrc.split('/').pop();
+                    await axios.delete(`http://localhost:5000/api/delete`, {
+                        data: { fileName: `portraits/${oldFileName}` }
+                    });
+                }
             } catch (error) {
                 setErrorMessage("Error uploading portrait");
                 return;
             }
         }
-
+    
         try {
             const response = await axios.put(`http://localhost:5000/api/teachers/${id}`, updatedData);
             setTeacherDetails(response.data);
             setSuccessMessage("Teacher details updated successfully!");
             setErrorMessage("");
-
+    
             if (email) {
                 await axios.put(`http://localhost:5000/api/users/${uid}/${email}`);
             }

@@ -3,7 +3,8 @@ const admin = require('firebase-admin');
 const cors = require('cors');
 const serviceAccount = require('../server/serviceAccountKey.json');
 const bodyParser = require('body-parser');
-const fileUpload = require('express-fileupload')
+const fileUpload = require('express-fileupload');
+const { default: axios } = require('axios');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -170,21 +171,33 @@ app.get('/api/students/:id', async (req, res) => {
   }
 });
 
+
 app.get('/api/students', async (req, res) => {
+  const { grade } = req.query;
+
   try {
     const studentsRef = admin.database().ref('Students');
-    studentsRef.once('value', snapshot => {
-      if (!snapshot.exists()) {
-        return res.status(404).send({ message: 'No students found' });
-      }
-      const students = [];
-      snapshot.forEach(childSnapshot => {
-        students.push({ id: childSnapshot.key, ...childSnapshot.val() });
-      });
-      res.status(200).send(students);
+    let query = studentsRef;
+
+    if (grade) {
+      query = studentsRef.orderByChild('grade').equalTo(grade);
+    }
+
+    const snapshot = await query.once('value');
+
+    if (!snapshot.exists()) {
+      return res.status(404).json({ message: `No students found${grade ? ` for grade ${grade}` : ''}` });
+    }
+
+    const students = [];
+    snapshot.forEach((childSnapshot) => {
+      students.push({ id: childSnapshot.key, ...childSnapshot.val() });
     });
+
+    res.status(200).json(students);
   } catch (error) {
-    res.status(500).send({ error: 'Error fetching students' });
+    console.error('Error fetching students:', error);
+    res.status(500).json({ error: 'Error fetching students' });
   }
 });
 
@@ -372,6 +385,32 @@ app.post('/api/upload', async (req, res) => {
   blobStream.end(file.data);
 });
 
+app.delete('/api/delete', async (req, res) => {
+  const { fileName } = req.body;
+
+  if (!fileName) {
+    return res.status(400).json({ error: 'Missing fileName parameter' });
+  }
+
+  try {
+
+    const file = bucket.file(fileName);
+    const [exists] = await file.exists();
+
+    if (!exists) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+
+    await file.delete();
+
+    res.status(200).json({ message: 'File deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    res.status(500).json({ error: 'Failed to delete file' });
+  }
+});
+
+
 app.get('/api/teachers', async (req, res) => {
   try {
     const teachersRef = admin.database().ref('Teachers');
@@ -500,6 +539,59 @@ app.put('/api/teachers/:id', async (req, res) => {
   }
 });
 
+
+app.get('/api/students/:id/marks', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const ref = admin.database().ref(`Students/${id}/marks`);
+    const snapshot = await ref.once('value');
+    const marks = snapshot.val();
+
+    if (!marks) {
+      return res.status(404).json({ error: 'Marks not found for student' });
+    }
+
+  
+    const marksWithSubjects = Object.keys(marks).map(subject => {
+      return {
+        subject: subject,
+        marks: marks[subject].scores,
+      };
+    });
+
+    res.json(marksWithSubjects);
+  } catch (error) {
+    console.error("Error fetching student marks", error);
+    res.status(500).json({ error: 'Error fetching student marks' });
+  }
+});
+
+app.put('/api/students/:id/marks', async (req, res) => {
+  const { id } = req.params;
+  const { subject, scores } = req.body;
+  try {
+    const studentRef = admin.database().ref('Students').child(id);
+    const studentSnapshot = await studentRef.once('value');
+    const studentData = studentSnapshot.val();
+
+    if (!studentData) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    const updatedMarks = {
+      ...studentData.marks,
+      [subject]: { scores } 
+    };
+
+
+    await studentRef.update({ marks: updatedMarks });
+
+    res.json({ message: 'Marks updated successfully' });
+  } catch (error) {
+    console.error("Error updating student marks", error);
+    res.status(500).json({ error: 'Error updating student marks' });
+  }
+});
 
 
 app.get('/api/students/:grade/lessons', async (req, res) => {

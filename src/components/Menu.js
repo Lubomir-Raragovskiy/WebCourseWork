@@ -18,7 +18,6 @@ const Menu = () => {
             console.error('Error signing out: ', error);
         }
     };
-
     return (
         <Navbar>
             <Container>
@@ -38,12 +37,14 @@ const Menu = () => {
                     )}
                     {role === 'teacher' && (
                         <>
+                           
                             <Nav.Link href="/teacherLessons">Lessons</Nav.Link>
                         </>
                     )}
                     {role === 'student' && (
                         <>
                             <Nav.Link href="/studentLessons">Lessons</Nav.Link>
+                            <Nav.Link onClick={() => navigate(`/students/${userDetails.id}/marks`)}>Marks</Nav.Link>
                         </>
                     )}
                     {!currentUser && (
@@ -54,7 +55,7 @@ const Menu = () => {
                                 Log out
                             </Nav.Link>
                     )}
-                    {userDetails && (
+                    {userDetails && userDetails.user.portraitSrc && (
                         <Nav.Link className="ms-2">
                             <img src= {userDetails.user.portraitSrc}  
                             alt="User Portrait"

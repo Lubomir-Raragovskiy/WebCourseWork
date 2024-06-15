@@ -14,22 +14,21 @@ const StudentLessonsComponent = ({ studentId }) => {
             setLoading(true);
             setError('');
             try {
+
                 const lessonsResponse = await axios.get(`http://localhost:5000/api/students/${userDetails.user.grade}/lessons`);
-                if (Array.isArray(lessonsResponse.data)) {
-                    const lessonsWithTeachers = await Promise.all(
-                        lessonsResponse.data.map(async lesson => {
-                            try {
-                                const teacherResponse = await axios.get(`http://localhost:5000/api/teachers/${lesson.teacherId}`);
-                                return { ...lesson, teacherName: teacherResponse.data.name };
-                            } catch (err) {
-                                return { ...lesson, teacherName: "Not assigned" };
-                            }
-                        })
-                    );
-                    setLessons(lessonsWithTeachers);
-                } else {
-                    setError('Unexpected response format');
-                }
+                const lessonsData = lessonsResponse.data || {};
+
+                const lessonsWithTeachers = await Promise.all(Object.keys(lessonsData).map(async lessonId => {
+                    const lesson = lessonsData[lessonId];
+                    try {
+                        const teacherResponse = await axios.get(`http://localhost:5000/api/teachers/${lesson.teacherId}`);
+                        return { ...lesson, teacherName: teacherResponse.data.name };
+                    } catch (err) {
+                        return { ...lesson, teacherName: "Not assigned" };
+                    }
+                }));
+
+                setLessons(lessonsWithTeachers);
             } catch (error) {
                 setError('Failed to fetch lessons');
             } finally {
@@ -39,6 +38,7 @@ const StudentLessonsComponent = ({ studentId }) => {
 
         fetchLessonsAndTeachers();
     }, [studentId, userDetails.user.grade]);
+
 
     return (
         <Container>
@@ -50,16 +50,16 @@ const StudentLessonsComponent = ({ studentId }) => {
             ) : error ? (
                 <Alert variant="danger">{error}</Alert>
             ) : (
-                <Col>
-                    {lessons.map(lesson => (
-                        <Row key={lesson.id} xs={12} sm={6} md={4} lg={3}>
-
+                <Row xs={1} md={2} className="g-4">
+                    {lessons.map((lesson, index) => (
+                        <Col key={index}>
+                            <div className="p-3 border bg-light">
                                 <h5>{lesson.name}</h5>
-                                <h5>{lesson.teacherName}</h5>
-
-                        </Row>
+                                <p>Teacher: {lesson.teacherName}</p>
+                            </div>
+                        </Col>
                     ))}
-                </Col>
+                </Row>
             )}
         </Container>
     );

@@ -10,6 +10,8 @@ import AddTeacher from './pages/AddTeacher';
 import SignInForm from "./pages/SignIn";
 import ControlPanel from "./pages/ControlPanel"
 import AddUser from './pages/AddUser';
+import MarksComponent from './pages/Marks'
+import MarksAssignmentPage from './pages/MarkAssignment';
 import AccessDenied from './pages/AccessDenied'
 import Home from "./pages/Home"
 import { Routes, Route } from "react-router-dom"
@@ -47,6 +49,8 @@ function App() {
                         <Route path='/students/:id' element={<StudentPage />} />
                         <Route path='/teachers/:id' element={<TeacherPage />} />
                         <Route path='/grades/:gradeId' element={<PrivateRoute element={<GradeLessonsComponent />} allowedRoles={['admin']} />} />
+                        <Route path='/marks/:grade/:subject' element={<PrivateRoute element={<MarksAssignmentPage />} allowedRoles={['admin', 'teacher']} />} />
+                        <Route path='/students/:id/marks' element={<PrivateRoute element={<MarksComponent />} allowedRoles={['admin', 'teacher', 'student']} />} />
                     </Routes>
                 </main>
             </section>

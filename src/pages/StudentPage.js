@@ -104,35 +104,47 @@ function StudentPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    const updatedData = { ...formData };
+  
     if (portraitFile) {
       const fileData = new FormData();
       fileData.append('file', portraitFile);
-
+  
       try {
         const uploadResponse = await axios.post('http://localhost:5000/api/upload', fileData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-
-        formData.portraitSrc = uploadResponse.data.fileUrl;
+  
+        if (studentDetails?.portraitSrc) {
+          const oldFileName = studentDetails.portraitSrc.split('/').pop();
+          await axios.delete(`http://localhost:5000/api/delete`, {
+            data: { fileName: `portraits/${oldFileName}` }
+          });
+        }
+  
+        updatedData.portraitSrc = uploadResponse.data.fileUrl;
       } catch (error) {
-        console.error('Error uploading portrait', error);
+        console.error('Error uploading or deleting portrait', error);
+        setErrorMessage('Error updating student details');
+        return;
       }
     }
-
+  
     try {
-      const response = await axios.put(`http://localhost:5000/api/students/${id}`, formData);
-
+      const response = await axios.put(`http://localhost:5000/api/students/${id}`, updatedData);
+  
       if (email) {
         await axios.put(`http://localhost:5000/api/users/${uid}/${email}`);
       }
-
+  
       setStudentDetails(response.data);
       setSuccessMessage('Student details updated successfully!');
       setErrorMessage('');
     } catch (error) {
+      console.error('Error updating student details', error);
       setErrorMessage('Error updating student details');
       setSuccessMessage('');
     }

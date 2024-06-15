@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../utils/authContext'; 
-import { Table } from 'react-bootstrap';
+import { AuthContext } from '../utils/authContext';
+import { Table, Button } from 'react-bootstrap';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 
 const TeacherLessonsComponent = () => {
-    const { userDetails } = useContext(AuthContext); 
-    const teacherId = userDetails ? userDetails.id : null; 
+    const { userDetails } = useContext(AuthContext);
+    const teacherId = userDetails ? userDetails.id : null;
     const [lessons, setLessons] = useState([]);
+    const navigate = useNavigate(); // Initialize navigate function from react-router-dom
 
     useEffect(() => {
         if (teacherId) {
@@ -23,8 +25,11 @@ const TeacherLessonsComponent = () => {
         }
     };
 
+    const navigateToAssignMarks = (grade, name) => {
+        navigate(`/marks/${grade}/${name}`);
+    };
+
     return (
-        console.log(userDetails),
         <div>
             <h2>Lessons for {userDetails ? userDetails.user.name : ''}</h2>
             <Table striped bordered hover>
@@ -32,6 +37,7 @@ const TeacherLessonsComponent = () => {
                     <tr>
                         <th>Subject</th>
                         <th>Grade</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -39,6 +45,14 @@ const TeacherLessonsComponent = () => {
                         <tr key={index}>
                             <td>{lesson.name}</td>
                             <td>{lesson.grade}</td>
+                            <td>
+                                <Button
+                                    variant="outline-primary"
+                                    onClick={() => navigateToAssignMarks(lesson.grade, lesson.name)}
+                                    className="mb-3">
+                                    Assign Grade
+                                </Button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
