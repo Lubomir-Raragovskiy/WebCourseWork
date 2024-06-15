@@ -1,17 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { AuthContext } from '../utils/authContext';
+import '../styles/Card.css';
 
 const StudentCard = ({ student, onDelete }) => {
     const navigate = useNavigate();
+    const { role } = useContext(AuthContext);
 
     const goToDetails = () => {
         navigate("/students/" + student.id);
-    };
-
-    const goToMarks = () => {
-        navigate("/marks/" + student.id);
     };
 
     const deleteStudent = async () => {
@@ -30,9 +29,12 @@ const StudentCard = ({ student, onDelete }) => {
                 <Card.Img variant="top" src={student.portraitSrc} />
                 <Card.Title>{student.studentName}</Card.Title>
                 <Card.Text>{student.grade}</Card.Text>
-                <Button variant="outline-secondary" onClick={goToDetails}>Student details</Button>
-                <Button variant="outline-secondary" onClick={goToMarks} className="ms-2">Marks</Button>
-                <Button variant="outline-secondary" onClick={deleteStudent} className="ms-2">Delete</Button>
+                {role && (
+                    <Button variant="outline-primary" onClick={goToDetails}>Student details</Button>)}
+
+                {role === 'admin' && (
+                    <Button variant="outline-secondary" onClick={deleteStudent} className="ms-2">Delete</Button>
+                )}
             </Card.Body>
         </Card>
     );

@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { AuthContext } from '../utils/authContext';
+import '../styles/Card.css';
 
 const TeachersCard = ({ teacher, onDelete }) => {
     const navigate = useNavigate();
+    const { role } = useContext(AuthContext);
 
     const goToDetails = () => {
         navigate("/teachers/" + teacher.id);
@@ -28,8 +31,10 @@ const TeachersCard = ({ teacher, onDelete }) => {
                 <Card.Text>
                     Subjects: {teacher.subjects ? teacher.subjects.join(', ') : 'None'}
                 </Card.Text>
-                <Button variant="outline-secondary" onClick={goToDetails}>Teacher details</Button>
-                <Button variant="outline-danger" onClick={deleteTeacher} className="ms-2">Delete</Button>
+                <Button variant="outline-primary" onClick={goToDetails}>Teacher details</Button>
+                {role === 'admin' && (
+                    <Button variant="outline-secondary" onClick={deleteTeacher} className="ms-2">Delete</Button>
+                )}
             </Card.Body>
         </Card>
     );

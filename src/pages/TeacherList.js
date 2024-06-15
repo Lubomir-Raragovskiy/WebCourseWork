@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Spinner, Alert, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import TeachersCard from '../components/TeacherCard';
+import { AuthContext } from '../utils/authContext';
 
 const TeachersListComponent = () => {
     const [teachers, setTeachers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const { role } = useContext(AuthContext);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -34,9 +36,11 @@ const TeachersListComponent = () => {
     return (
         <Container>
             <h2 className="my-4">Teachers List</h2>
-            <Button variant="secondary" onClick={() => navigate('/teachers/add')} className="mb-3">
-                Add New Teacher
-            </Button>
+            {role === 'admin' && (
+                <Button variant="secondary" onClick={() => navigate('/teachers/add')} className="mb-3">
+                    Add New Teacher
+                </Button>
+            )}
             {loading ? (
                 <Spinner animation="border" role="status">
                     <span className="visually-hidden">Loading...</span>

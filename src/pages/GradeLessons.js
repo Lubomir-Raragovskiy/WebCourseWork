@@ -6,7 +6,7 @@ import axios from 'axios';
 const GradeLessonsComponent = () => {
     const { gradeId } = useParams();
     const [gradeDetails, setGradeDetails] = useState({});
-    const [subjects, setSubjects] = useState([]);
+    const [subjects, setSubjects] = useState({});
     const [allSubjects, setAllSubjects] = useState([]);
     const [newSubject, setNewSubject] = useState('');
     const [selectedTeacher, setSelectedTeacher] = useState('');
@@ -22,7 +22,7 @@ const GradeLessonsComponent = () => {
         try {
             const response = await axios.get(`http://localhost:5000/api/grades/${gradeId}`);
             setGradeDetails(response.data);
-            setSubjects(response.data.subjects || []);
+            setSubjects(response.data.subjects || {});
         } catch (error) {
             console.error('Error fetching grade details:', error);
         }
@@ -47,10 +47,10 @@ const GradeLessonsComponent = () => {
     };
 
     const handleAddSubject = async () => {
-        if (newSubject && selectedTeacher) {
+        if (newSubject) {
             const updatedSubjects = {
                 ...subjects,
-                [newSubject]: { name: newSubject, teacherId: selectedTeacher }
+                [newSubject]: { name: newSubject, teacherId: selectedTeacher || null }
             };
             try {
                 await axios.post(`http://localhost:5000/api/grades/${gradeId}/subjects`, { name: newSubject, teacherId: selectedTeacher });
@@ -65,20 +65,16 @@ const GradeLessonsComponent = () => {
 
     const handleRemoveSubject = async (subjectName) => {
         try {
-
-          const updatedSubjects = { ...subjects };
-    
-          delete updatedSubjects[subjectName];
-
-          await axios.delete(`http://localhost:5000/api/grades/${gradeId}/subjects/${subjectName}`);
-
-          setSubjects(updatedSubjects);
+            const updatedSubjects = { ...subjects };
+            delete updatedSubjects[subjectName];
+            await axios.delete(`http://localhost:5000/api/grades/${gradeId}/subjects/${subjectName}`);
+            setSubjects(updatedSubjects);
         } catch (error) {
-          console.error('Error removing subject:', error);
+            console.error('Error removing subject:', error);
         }
-      };
+    };
 
-      const handleAssignTeacher = async (teacherId, subjectName) => {
+    const handleAssignTeacher = async (teacherId, subjectName) => {
         const subject = subjects[subjectName];
 
         if (subject) {
@@ -122,13 +118,15 @@ const GradeLessonsComponent = () => {
                                 <td>
                                     <Form.Control as="select" value={subject.teacherId} onChange={(e) => handleAssignTeacher(e.target.value, subjectId)}>
                                         <option value="">Select a teacher</option>
-                                        {teachers.map(teacher => (
-                                            <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
-                                        ))}
+                                        {teachers
+                                            .filter(teacher => teacher.subjects.includes(subject.name))
+                                            .map(teacher => (
+                                                <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
+                                            ))}
                                     </Form.Control>
                                 </td>
                                 <td>
-                                    <Button variant="danger" onClick={() => handleRemoveSubject(subjectId)}>Remove</Button>
+                                    <Button variant="outline-secondary" onClick={() => handleRemoveSubject(subjectId)}>Remove</Button>
                                 </td>
                             </tr>
                         );
@@ -158,12 +156,14 @@ const GradeLessonsComponent = () => {
                     <Form.Label>Select Teacher</Form.Label>
                     <Form.Control as="select" value={selectedTeacher} onChange={(e) => setSelectedTeacher(e.target.value)}>
                         <option value="">Select a teacher</option>
-                        {teachers.map(teacher => (
-                            <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
-                        ))}
+                        {teachers
+                            .filter(teacher => teacher.subjects.includes(newSubject))
+                            .map(teacher => (
+                                <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
+                            ))}
                     </Form.Control>
                 </Form.Group>
-                <Button variant="primary" onClick={handleAddSubject}>Add Subject</Button>
+                <Button variant="outline-primary" onClick={handleAddSubject}>Add Subject</Button>
             </Form>
         </div>
     );

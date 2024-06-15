@@ -1,8 +1,241 @@
+
 .app {
     text-align: center;
-    border:solid;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .app-header {
-   background-color: lightgreen;
+    background-color: #51d356;
+    color: white;
+    padding: 20px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-transform: uppercase;
 }
+
+.app-nav {
+    margin: 20px 0;
+}
+
+.app-nav a {
+    color: #4CAF50;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 1.2em;
+    transition: color 0.3s ease;
+}
+
+.app-nav a:hover {
+    text-decoration: underline;
+    color: #388E3C;
+}
+
+.app-content {
+    text-align: left;
+    padding: 20px;
+    font-size: 1em;
+    line-height: 1.6em;
+}
+
+.app-footer {
+    margin-top: 20px;
+    color: #777;
+    font-size: 0.9em;
+}
+
+.button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1em;
+    margin: 10px 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button:hover {
+    background-color: #45a049;
+}
+
+.button:active {
+    background-color: #388E3C;
+    transform: scale(0.98);
+}
+
+.form-group {
+    margin: 20px 0;
+}
+
+.form-label {
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+.form-control {
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+}
+
+.loading-spinner {
+    display: block;
+    margin: 50px auto;
+    color: #4CAF50;
+}
+
+.error-alert {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.student-list-row {
+    margin-top: 20px;
+}
+
+.student-list-col {
+    margin-bottom: 20px;
+}
+h2 {
+    font-size: 2em;
+    color: #4CAF50;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.user-portrait {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+/* Buttons */
+.btn-outline-secondary {
+    color: #af4c4c;
+    border: 1px solid #af4c4c;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #af4c4c;
+    color: white;
+}
+
+.btn-outline-secondary:active {
+    background-color: #af4c4c;
+    border-color: #af4c4c;
+}
+
+
+.btn-outline-primary {
+    color: #4CAF50;
+    border: 1px solid #4CAF50;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #45a049;
+    color: white;
+}
+.btn-outline-primary:active {
+    background-color: #388E3C;
+    transform: scale(0.98);
+}
+
+.user-page-img {
+    width: 400px;
+    height: 400px; 
+    object-fit: cover; 
+}
+
+.list-group {
+    margin-top: 20px; 
+    border: 1px solid #ccc; 
+    border-radius: 8px; 
+  }
+  
+  .list-group-item {
+    cursor: pointer; 
+    background-color: #f8f9fa; 
+    border-color: #dee2e6; 
+    color: #495057; 
+    margin-bottom: 5px; 
+  }
+  
+  .list-group-item.active {
+    background-color: #388E3C; 
+    color: #fff; 
+    border-color: #388E3C; 
+  }
+
+
+@media (max-width: 768px) {
+    .app {
+        padding: 15px;
+        margin: 30px auto;
+    }
+    .app-header {
+        font-size: 1.2em;
+        padding: 15px;
+    }
+    .app-nav a {
+        font-size: 1em;
+        margin: 0 10px;
+    }
+    .app-content {
+        padding: 15px;
+        font-size: 0.9em;
+    }
+    .button {
+        padding: 12px 25px;
+        font-size: 0.9em;
+    }
+    h2 {
+        font-size: 1.8em;
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .app {
+        padding: 10px;
+        margin: 20px auto;
+    }
+    .app-header {
+        font-size: 1em;
+        padding: 10px;
+    }
+    .app-nav a {
+        font-size: 0.9em;
+        margin: 0 8px;
+    }
+    .app-content {
+        padding: 10px;
+        font-size: 0.8em;
+    }
+    .button {
+        padding: 10px 20px;
+        font-size: 0.8em;
+    }
+    h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    
+}
+

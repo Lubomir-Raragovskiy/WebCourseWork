@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Container, Spinner, Alert, Row, Col } from "react-bootstrap";
+import React, { useState, useEffect, useContext } from 'react';
+import { Button, Container, Spinner, Alert, Row, Col, Form } from "react-bootstrap";
 import axios from 'axios';
 import StudentCard from "../components/StudentCard";
 import { useNavigate, useParams } from "react-router-dom";
+import { AuthContext } from '../utils/authContext';
 
 const StudentListComponent = () => {
     const { grade } = useParams();
+    const { role } = useContext(AuthContext);
     const [studentList, setStudentList] = useState([]);
     const [filteredStudentList, setFilteredStudentList] = useState([]);
+    const [grades, setGrades] = useState([]);
+    const [selectedGrade, setSelectedGrade] = useState(grade || '');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -25,13 +29,24 @@ const StudentListComponent = () => {
             }
         };
 
+        const fetchGrades = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/api/grades');
+                setGrades(response.data);
+            } catch (error) {
+                setError('Error fetching grades');
+                console.error(error);
+            }
+        };
+
         fetchStudents();
+        fetchGrades();
     }, []);
 
     useEffect(() => {
         const applyFilter = () => {
-            if (grade) {
-                const filtered = studentList.filter(student => student.grade === grade);
+            if (selectedGrade) {
+                const filtered = studentList.filter(student => student.grade === selectedGrade);
                 setFilteredStudentList(filtered);
             } else {
                 setFilteredStudentList(studentList);
@@ -39,7 +54,7 @@ const StudentListComponent = () => {
         };
 
         applyFilter();
-    }, [grade, studentList]);
+    }, [selectedGrade, studentList]);
 
     const handleDelete = (id) => {
         setStudentList(studentList.filter(student => student.id !== id));
@@ -48,9 +63,20 @@ const StudentListComponent = () => {
     return (
         <Container>
             <h2 className="my-4">Student List</h2>
-            <Button variant="secondary" onClick={() => navigate('/students/add')} className="mb-3">
-                Add New Student
-            </Button>
+            {role === 'admin' && (
+                <Button variant="secondary" onClick={() => navigate('/students/add')} className="mb-3">
+                    Add New Student
+                </Button>
+            )}
+            <Form.Group controlId="gradeSelect" className="mb-3">
+                <Form.Label>Select Grade</Form.Label>
+                <Form.Control as="select" value={selectedGrade} onChange={(e) => setSelectedGrade(e.target.value)}>
+                    <option value="">All Grades</option>
+                    {grades.map(grade => (
+                        <option key={grade.id} value={grade.grade}>{grade.grade}</option>
+                    ))}
+                </Form.Control>
+            </Form.Group>
             {loading ? (
                 <Spinner animation="border" role="status">
                     <span className="visually-hidden">Loading...</span>

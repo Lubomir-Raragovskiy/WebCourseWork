@@ -1,67 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Button, Alert, ListGroup } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import SubjectsList from '../components/SubjectsSelectableList';
+import PortraitUploader from '../components/PortraitUploader';
 
 const AddTeacher = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [subjects, setSubjects] = useState([]);
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [password, setPassword] = useState('');
   const [portraitFile, setPortraitFile] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [validationError, setValidationError] = useState('');
 
-  useEffect(() => {
-    fetchSubjects();
-  }, []);
-
-  const fetchSubjects = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/subjects');
-      setSubjects(response.data);
-    } catch (error) {
-      console.error('Error fetching subjects:', error);
-      alert('An error occurred while fetching subjects. Please try again later.');
-    }
-  };
-
-  const handleSubjectClick = (e, selectedSubject) => {
-    e.preventDefault(); // Prevent default form submission behavior
-    e.stopPropagation(); // Stop event from bubbling up
-
-    let updatedSelectedSubjects = [...selectedSubjects];
-    if (updatedSelectedSubjects.includes(selectedSubject)) {
-      updatedSelectedSubjects = updatedSelectedSubjects.filter(
-        (subject) => subject !== selectedSubject
-      );
-    } else {
-      updatedSelectedSubjects.push(selectedSubject);
-    }
-    setSelectedSubjects(updatedSelectedSubjects);
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
-
-    if (file && validImageTypes.includes(file.type)) {
-      setPortraitFile(file);
-    } else {
-      alert('Please upload a valid image file (jpg, png, or gif).');
-      setPortraitFile(null);
-      e.target.value = null;
-    }
+  const handleFileSelect = (file) => {
+    setPortraitFile(file);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted'); // Debug log
 
     if (!name || !email || !password || selectedSubjects.length === 0) {
-      alert('Please fill in all fields');
+      setValidationError('Please fill in all fields');
       return;
     }
+
+    setValidationError('');
 
     try {
       let portraitSrc = '';
@@ -93,7 +58,6 @@ const AddTeacher = () => {
       setPassword('');
       setPortraitFile(null);
 
-      alert('Teacher added successfully!');
       setSuccess('Teacher added successfully!');
       setError('');
     } catch (error) {
@@ -106,6 +70,7 @@ const AddTeacher = () => {
   return (
     <div className="container mt-4">
       <h2>Add Teacher</h2>
+      {validationError && <Alert variant="warning">{validationError}</Alert>}
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">{success}</Alert>}
       <Form onSubmit={handleSubmit}>
@@ -144,38 +109,13 @@ const AddTeacher = () => {
 
         <Form.Group controlId="subjects">
           <Form.Label className="mb-3">Subjects</Form.Label>
-          <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ced4da', borderRadius: '5px', padding: '10px' }}>
-            <ListGroup>
-              {subjects.map((subject) => (
-                <ListGroup.Item
-                  key={subject.id}
-                  action
-                  as="button" // Use as="button" to prevent form submission
-                  onClick={(e) => handleSubjectClick(e, subject.name)}
-                  active={selectedSubjects.includes(subject.name)}
-                  style={{
-                    cursor: 'pointer',
-                    marginBottom: '5px',
-                    backgroundColor: selectedSubjects.includes(subject.name) ? '#d3f9d8' : 'white',
-                    border: '1px solid #ced4da',
-                    borderRadius: '5px',
-                    padding: '10px'
-                  }}
-                >
-                  {subject.name}
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          </div>
-        </Form.Group>
-
-        <Form.Group controlId="portrait">
-          <Form.Label>Portrait</Form.Label>
-          <Form.Control
-            type="file"
-            onChange={handleFileChange}
+          <SubjectsList
+            selectedSubjects={selectedSubjects}
+            setSelectedSubjects={setSelectedSubjects}
           />
         </Form.Group>
+
+        <PortraitUploader onFileSelect={handleFileSelect} />
 
         <Button variant="primary" type="submit" className="mt-3">
           Submit

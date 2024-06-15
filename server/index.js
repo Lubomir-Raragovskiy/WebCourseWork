@@ -36,6 +36,38 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+app.get('/api/users/:uid', async (req, res) => {
+  const { uid } = req.params;
+
+  try {
+      const user = await admin.auth().getUser(uid);
+      if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json(user);
+  } catch (error) {
+      console.error('Error fetching user details:', error);
+      res.status(500).json({ error: 'Failed to fetch user details' });
+  }
+});
+
+app.put('/api/users/:uid/:email', async (req, res) => {
+  const { uid, email } = req.params;
+
+  try {
+      const user = await admin.auth().updateUser(uid, {email});
+      if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json(user);
+  } catch (error) {
+      console.error('Error fetching user details:', error);
+      res.status(500).json({ error: 'Failed to fetch user details' });
+  }
+});
+
 app.delete('/api/users/:uid', async (req, res) => {
   const uid = req.params.uid;
   try {
@@ -58,6 +90,32 @@ app.post('/api/users/:uid/role', async (req, res) => {
     res.status(500).json({ error: 'Failed to update user role' });
   }
 });
+
+app.get('/api/getUserDetails/:uid', async (req, res) => {
+  const uid = req.params.uid;
+  const role = req.query.role;
+
+  try {
+    const snapshot = await admin.database().ref(role === 'student' ? 'Students' : 'Teachers')
+      .orderByChild('uid')
+      .equalTo(uid)
+      .once('value');
+
+    const userData = snapshot.val();
+
+    if (userData) {
+      const id = Object.keys(userData)[0];
+      const user = userData[id];
+      res.json({ id, user });
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 app.post('/api/signup', async (req, res) => {
   try {
@@ -160,6 +218,25 @@ app.post('/api/students', async (req, res) => {
     res.status(500).json({ error: 'Failed to add student' });
   }
 });
+
+app.put('/api/students/:id', async (req, res) => {
+  const { id } = req.params;
+  const formData = req.body;
+
+  try {
+      const studentRef = admin.database().ref(`Students/${id}`);
+      await studentRef.update(formData);
+
+      const updatedStudentSnapshot = await studentRef.once('value');
+      const updatedStudent = updatedStudentSnapshot.val();
+
+      res.json(updatedStudent);
+  } catch (error) {
+      console.error('Error updating student details:', error);
+      res.status(500).json({ error: 'Failed to update student details' });
+  }
+});
+
 
 app.get('/api/grades', async (req, res) => {
   try {
@@ -381,8 +458,68 @@ app.delete('/api/teachers/:id', async (req, res) => {
   }
 });
 
+app.get('/api/teachers/:teacherId/lessons', async (req, res) => {
+  const teacherId = req.params.teacherId;
+  try {
+      const gradesRef = admin.database().ref('Grades');
+      const gradesSnapshot = await gradesRef.once('value');
+      const lessons = [];
+
+      gradesSnapshot.forEach(gradeSnapshot => {
+          const subjects = gradeSnapshot.child('subjects').val();
+          for (const subjectId in subjects) {
+              const subject = subjects[subjectId];
+              if (subject.teacherId === teacherId) {
+                  lessons.push({ id: subjectId, ...subject, grade: gradeSnapshot.child('grade').val() });
+              }
+          }
+      });
+
+      res.status(200).send(lessons);
+  } catch (error) {
+      console.error('Error fetching lessons:', error);
+      res.status(500).send({ error: 'Failed to fetch lessons' });
+  }
+});
+
+app.put('/api/teachers/:id', async (req, res) => {
+  const { id } = req.params;
+  const formData = req.body;
+
+  try {
+      const studentRef = admin.database().ref(`Teachers/${id}`);
+      await studentRef.update(formData);
+
+      const updatedStudentSnapshot = await studentRef.once('value');
+      const updatedStudent = updatedStudentSnapshot.val();
+
+      res.json(updatedStudent);
+  } catch (error) {
+      console.error('Error updating student details:', error);
+      res.status(500).json({ error: 'Failed to update student details' });
+  }
+});
 
 
+
+app.get('/api/students/:grade/lessons', async (req, res) => {
+  try {
+    const { grade } = req.params;
+    const gradesRef = admin.database().ref('Grades').orderByChild('grade').equalTo(grade);
+    const gradesSnapshot = await gradesRef.once('value');
+    
+    const gradesData = gradesSnapshot.val();
+    if (gradesData) {
+      const lessons = Object.values(gradesData)[0].subjects || [];
+      res.status(200).send(lessons);
+    } else {
+      res.status(404).send({ error: 'Grade not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching lessons:', error);
+    res.status(500).send({ error: 'Failed to fetch lessons' });
+  }
+});
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

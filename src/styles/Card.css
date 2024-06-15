@@ -1,0 +1,99 @@
+/* Card Container */
+.card {
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-img-top {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    height: 300px;
+    object-fit: cover;
+}
+
+/* Card Title */
+.card-title {
+    font-size: 1.5em;
+    color: #4CAF50;
+    margin-bottom: 10px;
+}
+
+/* Card Text */
+.card-text {
+    font-size: 1em;
+
+    color: #555;
+}
+
+/* Buttons */
+.btn-outline-secondary {
+    color: #af4c4c;
+    border: 1px solid #af4c4c;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #af4c4c;
+    color: white;
+}
+
+.btn-outline-secondary:active {
+    background-color: #af4c4c;
+    border-color: #af4c4c;
+}
+
+
+.btn-outline-primary {
+    color: #4CAF50;
+    border: 1px solid #4CAF50;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #45a049;
+    color: white;
+}
+.btn-outline-primary:active {
+    background-color: #388E3C;
+    transform: scale(0.98);
+}
+
+/* Button Spacing */
+.card .btn + .btn {
+    margin-left: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.3em;
+    }
+    .card-text {
+        font-size: 0.9em;
+    }
+    .card .btn-outline-secondary {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-title {
+        font-size: 1.2em;
+    }
+    .card-text {
+        font-size: 0.8em;
+    }
+    .card .btn-outline-secondary {
+        padding: 6px 12px;
+        font-size: 0.8em;
+    }
+}
