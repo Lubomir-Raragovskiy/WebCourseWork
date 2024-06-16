@@ -49,7 +49,7 @@ const ControlPanel = () => {
     return (
       <div className="container mt-4">
           <h2>Admin Control Panel</h2>
-          <Button variant="secondary" onClick={() => navigate('/addUser')} className="mb-3">
+          <Button variant="outline-primary" onClick={() => navigate('/addUser')} className="mb-3">
               Add New User
           </Button>
           {loading ? (
@@ -73,16 +73,16 @@ const ControlPanel = () => {
                               <td>{user.email}</td>
                               <td>{user.role}</td>
                               <td>
-                                  <Button variant="secondary" onClick={() => deleteUser(user.uid)} className="me-2">
+                                  <Button variant="outline-secondary" onClick={() => deleteUser(user.uid)} className="me-2">
                                       Delete
                                   </Button>
-                                  <Button variant="secondary" onClick={() => updateUserRole(user.uid, 'admin')} className="me-2">
+                                  <Button variant="outline-primary" onClick={() => updateUserRole(user.uid, 'admin')} className="me-2">
                                       Make Admin
                                   </Button>
-                                  <Button variant="secondary" onClick={() => updateUserRole(user.uid, 'teacher')} className="me-2">
+                                  <Button variant="outline-primary" onClick={() => updateUserRole(user.uid, 'teacher')} className="me-2">
                                       Make Teacher
                                   </Button>
-                                  <Button variant="secondary" onClick={() => updateUserRole(user.uid, 'student')}>
+                                  <Button variant="outline-primary" onClick={() => updateUserRole(user.uid, 'student')}>
                                       Make Student
                                   </Button>
                               </td>

@@ -2,13 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../utils/authContext';
 import { Table, Button } from 'react-bootstrap';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
+import { useNavigate } from 'react-router-dom';
 
 const TeacherLessonsComponent = () => {
     const { userDetails } = useContext(AuthContext);
     const teacherId = userDetails ? userDetails.id : null;
     const [lessons, setLessons] = useState([]);
-    const navigate = useNavigate(); // Initialize navigate function from react-router-dom
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (teacherId) {
