@@ -117,7 +117,7 @@ const AddTeacher = () => {
 
         <PortraitUploader onFileSelect={handleFileSelect} />
 
-        <Button variant="primary" type="submit" className="mt-3">
+        <Button variant="outline-primary" type="submit" className="mt-3">
           Submit
         </Button>
       </Form>

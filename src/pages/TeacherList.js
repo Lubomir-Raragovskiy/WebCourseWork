@@ -37,7 +37,7 @@ const TeachersListComponent = () => {
         <Container>
             <h2 className="my-4">Teachers List</h2>
             {role === 'admin' && (
-                <Button variant="secondary" onClick={() => navigate('/teachers/add')} className="mb-3">
+                <Button variant="outline-primary" onClick={() => navigate('/teachers/add')} className="mb-3">
                     Add New Teacher
                 </Button>
             )}

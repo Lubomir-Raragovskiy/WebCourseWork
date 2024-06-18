@@ -64,7 +64,7 @@ const StudentListComponent = () => {
         <Container>
             <h2 className="my-4">Student List</h2>
             {role === 'admin' && (
-                <Button variant="secondary" onClick={() => navigate('/students/add')} className="mb-3">
+                <Button variant="outline-primary" onClick={() => navigate('/students/add')} className="mb-3">
                     Add New Student
                 </Button>
             )}

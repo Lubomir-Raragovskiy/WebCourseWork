@@ -75,10 +75,10 @@ const AddUser = () => {
                         <option value="admin">Admin</option>
                     </Form.Control>
                 </Form.Group>
-                <Button variant="secondary" type="submit" className="me-2">
+                <Button variant="outline-primary" type="submit" className="me-2">
                     Add User
                 </Button>
-                <Button variant="secondary" onClick={() => navigate('/controlPanel')}>
+                <Button variant="outline-primary" onClick={() => navigate('/controlPanel')}>
                     Back to Control Panel
                 </Button>
             </Form>
