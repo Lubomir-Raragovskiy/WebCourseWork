@@ -123,7 +123,6 @@ app.post('/api/signup', async (req, res) => {
     const { email, role, password } = req.body;
     const userRecord = await admin.auth().createUser({ email, password });
     await admin.auth().setCustomUserClaims(userRecord.uid, { role });
-    const customToken = await admin.auth().createCustomToken(userRecord.uid);
     res.status(200).json({ message: 'User signed up successfully', uid: userRecord.uid });
   } catch (error) {
     console.error('Error signing up user:', error);

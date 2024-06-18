@@ -10,9 +10,9 @@ const AddStudent = () => {
   const [portraitFile, setPortraitFile] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [alertVariant, setAlertVariant] = useState('success');
-  const [alertMessage, setAlertMessage] = useState('');
-  const [showAlert, setShowAlert] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
     fetchGrades();
@@ -24,7 +24,7 @@ const AddStudent = () => {
       setGrades(response.data);
     } catch (error) {
       console.error('Error fetching grades:', error);
-      showAlertMessage('danger', 'An error occurred while fetching grades. Please try again later.');
+      setError('An error occurred while fetching grades. Please try again later.');
     }
   };
 
@@ -36,9 +36,11 @@ const AddStudent = () => {
     e.preventDefault();
 
     if (!studentName || !grade || !email || !password) {
-      showAlertMessage('danger', 'Please fill in all fields');
+      setValidationError('Please fill in all fields');
       return;
     }
+
+    setValidationError('');
 
     try {
       let portraitSrc = '';
@@ -47,54 +49,60 @@ const AddStudent = () => {
         const formData = new FormData();
         formData.append('file', portraitFile);
 
-        const uploadResponse = await axios.post('http://localhost:5000/api/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
+        try {
+          const uploadResponse = await axios.post('http://localhost:5000/api/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
 
-        portraitSrc = uploadResponse.data.fileUrl;
+          portraitSrc = uploadResponse.data.fileUrl;
+        } catch (uploadError) {
+          console.error('Error uploading portrait:', uploadError);
+          setError('Error uploading portrait. Please try again.');
+          return;
+        }
       }
 
-      await axios.post('http://localhost:5000/api/students', {
-        studentName,
-        grade,
-        portraitSrc,
-        email,
-        password,
-      });
+      try {
+        await axios.post('http://localhost:5000/api/students', {
+          studentName,
+          grade,
+          portraitSrc,
+          email,
+          password,
+        });
 
-      setStudentName('');
-      setGrade('');
-      setPortraitFile(null);
-      setEmail('');
-      setPassword('');
+        setStudentName('');
+        setGrade('');
+        setPortraitFile(null);
+        setEmail('');
+        setPassword('');
 
-      showAlertMessage('success', 'Student added successfully!');
+        setSuccess('Student added successfully!');
+        setError('');
+      } catch (apiError) {
+        console.error('Error adding student:', apiError);
+        if (apiError.response && apiError.response.data && apiError.response.data.message) {
+          setError(`Error: ${apiError.response.data.message}`);
+        } else {
+          setError('Error adding student. Please try again.');
+        }
+        setSuccess('');
+      }
     } catch (error) {
-      console.error('Error adding student:', error);
-      showAlertMessage('danger', 'An error occurred while adding the student. Please try again later.');
+      console.error('Unexpected error:', error);
+      setError('Unexpected error occurred. Please try again.');
+      setSuccess('');
     }
   };
 
-  const showAlertMessage = (variant, message) => {
-    setAlertVariant(variant);
-    setAlertMessage(message);
-    setShowAlert(true);
-  };
-
-  const handleAlertClose = () => {
-    setShowAlert(false);
-  };
-
   return (
-    <div className="container">
+    <div className="container mt-4">
       <h2>Add Student</h2>
-      {showAlert && (
-        <Alert variant={alertVariant} onClose={handleAlertClose} dismissible>
-          {alertMessage}
-        </Alert>
-      )}
+      {validationError && <Alert variant="warning">{validationError}</Alert>}
+      {error && <Alert variant="danger">{error}</Alert>}
+      {success && <Alert variant="success">{success}</Alert>}
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3" controlId="studentName">
           <Form.Label>Student Name</Form.Label>
@@ -103,6 +111,7 @@ const AddStudent = () => {
             placeholder="Enter student name"
             value={studentName}
             onChange={(e) => setStudentName(e.target.value)}
+            required
           />
         </Form.Group>
 
@@ -112,6 +121,7 @@ const AddStudent = () => {
             as="select"
             value={grade}
             onChange={(e) => setGrade(e.target.value)}
+            required
           >
             <option value="">Select grade</option>
             {grades.map(grade => (
@@ -131,6 +141,7 @@ const AddStudent = () => {
             placeholder="Enter email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </Form.Group>
 
@@ -141,6 +152,7 @@ const AddStudent = () => {
             placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </Form.Group>
 

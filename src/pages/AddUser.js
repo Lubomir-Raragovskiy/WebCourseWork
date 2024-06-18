@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 const AddUser = () => {
     const [email, setEmail] = useState('');
@@ -9,7 +8,6 @@ const AddUser = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -77,9 +75,6 @@ const AddUser = () => {
                 </Form.Group>
                 <Button variant="outline-primary" type="submit" className="me-2">
                     Add User
-                </Button>
-                <Button variant="outline-primary" onClick={() => navigate('/controlPanel')}>
-                    Back to Control Panel
                 </Button>
             </Form>
         </div>
